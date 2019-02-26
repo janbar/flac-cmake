@@ -141,18 +141,19 @@ if(ENABLE_OGG)
     list(APPEND FLAC_link_libraries ogg)
 endif()
 
-add_library(FLAC STATIC ${FLAC_SRCS} ${extra_SRCS})
-target_link_libraries(FLAC ${FLAC_link_libraries})
-set(FLAC_TGTS FLAC)
-if(BUILD_SHARED_LIBS)
-    add_library(FLAC-shared SHARED ${FLAC_SRCS} ${extra_SRCS})
-    target_link_libraries(FLAC-shared ${FLAC_link_libraries})
-    set_target_properties (FLAC-shared PROPERTIES
+if(BUILD_SHARED_LIBS OR ANDROID)
+    add_library(FLAC SHARED ${FLAC_SRCS} ${extra_SRCS})
+    target_link_libraries(FLAC ${FLAC_link_libraries})
+    set_target_properties (FLAC PROPERTIES
         VERSION "${FLAC_LIB_VERSION}"
         SOVERSION "${FLAC_LIB_SOVERSION}"
         OUTPUT_NAME FLAC
     )
-    set(FLAC_TGTS ${FLAC_TGTS} FLAC-shared)
+    set(FLAC_TGTS FLAC)
+else()
+    add_library(FLAC STATIC ${FLAC_SRCS} ${extra_SRCS})
+    target_link_libraries(FLAC ${FLAC_link_libraries})
+    set(FLAC_TGTS FLAC)
 endif()
 
 set(FLAC_LIBRARIES
@@ -171,20 +172,21 @@ set(
     src/libFLAC++/stream_encoder.cpp
 )
 
-add_library(FLAC++ STATIC ${FLAC++_SRCS})
-add_dependencies(FLAC++ FLAC)
-target_link_libraries(FLAC++ FLAC ${FLAC_link_libraries})
-set(FLAC++_TGTS FLAC++)
-if(BUILD_SHARED_LIBS)
-    add_library(FLAC++-shared SHARED ${FLAC++_SRCS})
-    add_dependencies(FLAC++-shared FLAC-shared)
-    target_link_libraries(FLAC++-shared FLAC-shared ${FLAC_link_libraries})
-    set_target_properties (FLAC++-shared PROPERTIES
+if(BUILD_SHARED_LIBS OR ANDROID)
+    add_library(FLAC++ SHARED ${FLAC++_SRCS})
+    add_dependencies(FLAC++ FLAC)
+    target_link_libraries(FLAC++ FLAC ${FLAC_link_libraries})
+    set_target_properties (FLAC++ PROPERTIES
         VERSION "${FLAC++_LIB_VERSION}"
         SOVERSION "${FLAC++_LIB_SOVERSION}"
         OUTPUT_NAME FLAC++
     )
-    set(FLAC++_TGTS ${FLAC++_TGTS} FLAC++-shared)
+    set(FLAC++_TGTS FLAC++)
+else()
+    add_library(FLAC++ STATIC ${FLAC++_SRCS})
+    add_dependencies(FLAC++ FLAC)
+    target_link_libraries(FLAC++ FLAC ${FLAC_link_libraries})
+    set(FLAC++_TGTS FLAC++)
 endif()
 
 set(FLAC++_LIBRARIES
