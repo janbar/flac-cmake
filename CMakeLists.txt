@@ -7,8 +7,6 @@ enable_language(CXX)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
-option(SKIP_INSTALL_ALL "Skip install all" OFF)
 option(ENABLE_OGG "Enbale build with OGG library" OFF)
 
 set(PACKAGE_NAME "flac")
