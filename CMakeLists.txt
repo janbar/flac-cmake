@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.1.0)
 
 project(FLAC)
+project(FLACXX)
 
 enable_language(C)
 enable_language(CXX)
@@ -14,8 +15,8 @@ set(PACKAGE_VERSION "1.3.2")
 set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 set(FLAC_LIB_VERSION "8.3.0")
 set(FLAC_LIB_SOVERSION 8)
-set(FLAC++_LIB_VERSION "6.3.0")
-set(FLAC++_LIB_SOVERSION 6)
+set(FLACXX_LIB_VERSION "6.3.0")
+set(FLACXX_LIB_SOVERSION 6)
 
 ###############################################################################
 # configure
@@ -147,12 +148,15 @@ if(BUILD_SHARED_LIBS OR ANDROID)
     set_target_properties (FLAC PROPERTIES
         VERSION "${FLAC_LIB_VERSION}"
         SOVERSION "${FLAC_LIB_SOVERSION}"
-        OUTPUT_NAME FLAC
+        OUTPUT_NAME "FLAC"
     )
     set(FLAC_TGTS FLAC)
 else()
     add_library(FLAC STATIC ${FLAC_SRCS} ${extra_SRCS})
     target_link_libraries(FLAC ${FLAC_link_libraries})
+    set_target_properties (FLAC PROPERTIES
+        OUTPUT_NAME "FLAC"
+    )
     set(FLAC_TGTS FLAC)
 endif()
 
@@ -166,37 +170,43 @@ set(FLAC_INCLUDE_DIR
 )
 
 set(
-    FLAC++_SRCS
+    FLACXX_SRCS
     src/libFLAC++/metadata.cpp
     src/libFLAC++/stream_decoder.cpp
     src/libFLAC++/stream_encoder.cpp
 )
 
 if(BUILD_SHARED_LIBS OR ANDROID)
-    add_library(FLAC++ SHARED ${FLAC++_SRCS})
-    add_dependencies(FLAC++ FLAC)
-    target_link_libraries(FLAC++ FLAC ${FLAC_link_libraries})
-    set_target_properties (FLAC++ PROPERTIES
-        VERSION "${FLAC++_LIB_VERSION}"
-        SOVERSION "${FLAC++_LIB_SOVERSION}"
-        OUTPUT_NAME FLAC++
+    add_library(FLACXX SHARED ${FLACXX_SRCS})
+    add_dependencies(FLACXX ${FLAC_TGTS})
+    target_link_libraries(FLACXX ${FLAC_LIBRARIES})
+    set_target_properties (FLACXX PROPERTIES
+        VERSION "${FLACXX_LIB_VERSION}"
+        SOVERSION "${FLACXX_LIB_SOVERSION}"
+        OUTPUT_NAME "FLAC++"
     )
-    set(FLAC++_TGTS FLAC++)
+    set(FLACXX_TGTS FLACXX)
 else()
-    add_library(FLAC++ STATIC ${FLAC++_SRCS})
-    add_dependencies(FLAC++ FLAC)
-    target_link_libraries(FLAC++ FLAC ${FLAC_link_libraries})
-    set(FLAC++_TGTS FLAC++)
+    add_library(FLACXX STATIC ${FLACXX_SRCS})
+    add_dependencies(FLACXX ${FLAC_TGTS})
+    target_link_libraries(FLACXX ${FLAC_LIBRARIES})
+    set_target_properties (FLACXX PROPERTIES
+        OUTPUT_NAME "FLAC++"
+    )
+    set(FLACXX_TGTS FLACXX)
 endif()
 
-set(FLAC++_LIBRARIES
-    FLAC++ ${FLAC_LIBRARIES}
+set(FLACXX_LIBRARIES
+    FLACXX ${FLAC_LIBRARIES}
     CACHE INTERNAL "" FORCE
 )
-set(FLAC++_INCLUDE_DIR
+set(FLACXX_INCLUDE_DIR
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     CACHE INTERNAL "" FORCE
 )
+
+export(PACKAGE FLAC)
+export(PACKAGE FLACXX)
 
 if(NOT MSVC)
 ###############################################################################
@@ -263,16 +273,16 @@ if(NOT SKIP_INSTALL_ALL)
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/FLAC/)
 
     ###########################################################################
-    # Add FLAC++ targets to the build-tree export set
+    # Add FLACXX targets to the build-tree export set
 
-    export(TARGETS ${FLAC++_TGTS} FILE "${CMAKE_CURRENT_BINARY_DIR}/FLAC++Targets.cmake")
+    export(TARGETS ${FLACXX_TGTS} FILE "${CMAKE_CURRENT_BINARY_DIR}/FLACXXTargets.cmake")
 
     configure_file (cmake/FLAC++.pc.in FLAC++.pc @ONLY)
-    configure_file (cmake/FLAC++Config.cmake.in FLAC++Config.cmake @ONLY)
-    configure_file (cmake/FLAC++ConfigVersion.cmake.in FLAC++ConfigVersion.cmake @ONLY)
+    configure_file (cmake/FLACXXConfig.cmake.in FLACXXConfig.cmake @ONLY)
+    configure_file (cmake/FLACXXConfigVersion.cmake.in FLACXXConfigVersion.cmake @ONLY)
 
-    install (TARGETS ${FLAC++_TGTS}
-        EXPORT FLAC++Targets
+    install (TARGETS ${FLACXX_TGTS}
+        EXPORT FLACXXTargets
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
@@ -281,18 +291,18 @@ if(NOT SKIP_INSTALL_ALL)
         "${CMAKE_CURRENT_BINARY_DIR}/FLAC++.pc"
         DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig")
 
-    # Install the FLAC++Config.cmake and FLAC++ConfigVersion.cmake
-    set(INSTALL_CMAKE_DIR "${CMAKE_INSTALL_FULL_LIBDIR}/cmake/FLAC++")
+    # Install the FLACXXConfig.cmake and FLAC++ConfigVersion.cmake
+    set(INSTALL_CMAKE_DIR "${CMAKE_INSTALL_FULL_LIBDIR}/cmake/FLACXX")
     install (FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/FLAC++Config.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/FLAC++ConfigVersion.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/FLACXXConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/FLACXXConfigVersion.cmake"
         DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
     # Install the export set for use with the install-tree
-    install(EXPORT FLAC++Targets DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+    install(EXPORT FLACXXTargets DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
-    file (GLOB FLAC++_HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/FLAC++/*.h)
-    install(FILES ${FLAC++_HEADER_FILES}
+    file (GLOB FLACXX_HEADER_FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/FLAC++/*.h)
+    install(FILES ${FLACXX_HEADER_FILES}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/FLAC++/)
 
 endif()
