@@ -18,6 +18,11 @@ set(FLAC_LIB_SOVERSION 8)
 set(FLACXX_LIB_VERSION "6.3.0")
 set(FLACXX_LIB_SOVERSION 6)
 
+if(WIN32)
+    set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
+    set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
+endif()
+
 ###############################################################################
 # configure
 
@@ -150,7 +155,7 @@ if(ENABLE_OGG)
     list(APPEND FLAC_link_libraries ogg)
 endif()
 
-if(BUILD_SHARED_LIBS OR ANDROID)
+if(BUILD_SHARED_LIBS)
     add_library(FLAC SHARED ${FLAC_SRCS} ${extra_SRCS})
     target_link_libraries(FLAC ${FLAC_link_libraries})
     set_target_properties (FLAC PROPERTIES
@@ -182,7 +187,7 @@ set(
     src/libFLAC++/stream_encoder.cpp
 )
 
-if(BUILD_SHARED_LIBS OR ANDROID)
+if(BUILD_SHARED_LIBS)
     add_library(FLACXX SHARED ${FLACXX_SRCS})
     add_dependencies(FLACXX ${FLAC_TGTS})
     target_link_libraries(FLACXX ${FLAC_LIBRARIES})
