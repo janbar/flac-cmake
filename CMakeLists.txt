@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.8.2...3.20)
 
 project(FLAC)
 project(FLACXX)
